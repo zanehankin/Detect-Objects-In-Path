@@ -28,6 +28,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        let configuration = ARWorldTrackingConfiguration()
+        guard let referenceObjects = ARReferenceObject.referenceObjects(inGroupNamed: "gallery", bundle: nil) else {
+            fatalError("Missing expected asset catalog resources.")
+        }
+        configuration.detectionObjects = referenceObjects
+        sceneView.session.run(configuration)
     }
     
     override func viewWillAppear(_ animated: Bool) {
