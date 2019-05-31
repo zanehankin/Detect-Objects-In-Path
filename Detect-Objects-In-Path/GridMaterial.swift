@@ -28,8 +28,7 @@ class GridMaterial: SCNMaterial {
     func updateWith(anchor: ARPlaneAnchor) {
         
         /*
-         Scene Kit uses meters for its measurements.
-         In order to get the texture looking good we need to decide the amount of times we want it to repeat per meter.
+         Scene Kit uses meters for its measurements so we need to decide the amount of times we want it to repeat per meter.
          */
         
         let mmPerMeter: Float = 1000
