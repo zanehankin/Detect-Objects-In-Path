@@ -12,3 +12,7 @@
 > My first iteration of the app simply detected planes in the real world. Then, I narrowed down my plane detection to vertical surfaces only because I only wanted to detect  walls and objects in my path, not the ground or other horizontal surfaces. Next, I wrote code that took the angle of two points on the vertical plane that the program detected, and I applied that angle to a 3D arrow that appears on the screen. The arrow corrects itself so the angle is at 90°, thus aligning the camera and the viewer parallelly to the vertical plane.
 
 ### Having Fun While Learning
+
+> Coding this app required as much research and as many websites as a 15 page History paper. I joined my Computer Science class halfway through the year, so I am still trying to perfect my syntax while extend my knowledge on the niche rules of Swift. That has made it tough for me to develop an app, luckyily, however, a lot of the concepts I want to use have already been figured out by other coders so I have benefited from that greatly--plus, Apple makes using Xcode super easy! Some of those concepts include Plane Detection and ARPlane Anchors.
+
+> I am also very lucky to have Paul Way as my teacher because he understands the world of programming like a sommelier with fine wine. In addition to knowing so much about Xcode and programming, he has articulated good approaches for any problem I have encountered. Thank you Paul!
