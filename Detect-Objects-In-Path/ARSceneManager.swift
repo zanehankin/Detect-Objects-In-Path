@@ -49,7 +49,6 @@ extension ARSceneManager: ARSCNViewDelegate {
             
             self.sceneView?.pointOfView?.addChildNode(self.ship!)
             
-            
             guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
             
             print("Found plane: \(planeAnchor)")
@@ -73,11 +72,12 @@ extension ARSceneManager: ARSCNViewDelegate {
             print(ang)
             
             self.ship?.eulerAngles.z = ang
+            ///HOW CAN YOU UPDATE THE EULER ANGLE AS IT IS CALCULATED? I WANT THE ARRROW TO MOVE FLUIDLY
 
             //Use an arrow to be positioned at the angle of the viewer and then to turn until the angles = one another
         }
     }
-    
+
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
         
