@@ -16,6 +16,8 @@ class ARSceneManager: NSObject{
     
     var ship: SCNNode? = nil
     
+    var sentence = ""
+    
     func attach(to sceneView: ARSCNView){
         self.sceneView = sceneView
         self.sceneView!.delegate = self
@@ -73,6 +75,26 @@ extension ARSceneManager: ARSCNViewDelegate {
             print(ang)
             
             self.ship?.eulerAngles.z = ang
+            
+            let roundedAng = String(format: "%.2f", abs(90-ang))
+            
+            if ang > 100{
+                print("Turn Right")
+                self.sentence = "Turn Right \(roundedAng) Degrees"
+                self.speakText()
+            }
+                
+            else if ang < 80{
+                print("Turn Left")
+                self.sentence = "Turn Left\(roundedAng) Degrees"
+                self.speakText()
+            }
+                
+            else{
+                print("Continue Straight")
+                self.sentence = "Continue Straight"
+                self.speakText()
+            }
         }
     }
     
@@ -88,6 +110,16 @@ extension ARSceneManager: ARSCNViewDelegate {
         planes.removeValue(forKey: anchor.identifier)
         node.enumerateChildNodes { (ship, _) in
             ship.removeFromParentNode()
+        }
+    }
+    
+    func speakText(){
+        let synth = AVSpeechSynthesizer()
+        let utterance = AVSpeechUtterance(string: sentence)
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        
+        if(!synth.isSpeaking){
+            synth.speak(utterance)
         }
     }
 }
