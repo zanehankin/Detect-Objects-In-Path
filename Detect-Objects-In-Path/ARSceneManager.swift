@@ -80,9 +80,9 @@ extension ARSceneManager: ARSCNViewDelegate {
             
             //needs to be 90 degrees
             var EAngle = (90-ang)
-            self.ship?.eulerAngles.z = EAngle
+            self.ship?.eulerAngles.z = abs(EAngle)
             
-//            if EAngle != 90{
+//            if EAngle < -80 || EAngle < 80{
 //                EAngle += 1
 //                self.ship?.eulerAngles.z = EAngle
 //            }
