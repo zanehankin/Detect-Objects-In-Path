@@ -74,25 +74,34 @@ extension ARSceneManager: ARSCNViewDelegate {
             ang = ang * -180 / .pi
             print(ang)
             
-            self.ship?.eulerAngles.z = ang
-            
             let roundedAng = String(format: "%.2f", abs(90-ang))
             
-            if ang > 100{
-                print("Turn Right")
-                self.sentence = "Turn Right \(roundedAng) Degrees"
+            //if rounded ang is < 90 turn the euler ang towards 90?
+            
+            //needs to be 90 degrees
+            var EAngle = (90-ang)
+            self.ship?.eulerAngles.z = EAngle
+            
+//            if EAngle != 90{
+//                EAngle += 1
+//                self.ship?.eulerAngles.z = EAngle
+//            }
+            
+            if ang < 0 || ang < -80 {
+                print("Turn Left")
+                self.sentence = "Turn Left \(roundedAng) Degrees"
                 self.speakText()
             }
                 
-            else if ang < 80{
-                print("Turn Left")
-                self.sentence = "Turn Left\(roundedAng) Degrees"
+            else if ang > 0 || ang < 80{
+                print("Turn Right")
+                self.sentence = "Turn Right\(roundedAng) Degrees"
                 self.speakText()
             }
                 
             else{
-                print("Continue Straight")
-                self.sentence = "Continue Straight"
+                print("Back Up and Turn 90 Degrees")
+                self.sentence = "Back Up and Turn 90 Degrees"
                 self.speakText()
             }
         }
