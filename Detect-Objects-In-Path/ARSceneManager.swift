@@ -38,8 +38,9 @@ class ARSceneManager: NSObject{
 
 extension ARSceneManager: ARSCNViewDelegate {
     
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor){
         DispatchQueue.main.async {
+            
             if(self.ship == nil){
                 let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
                 self.ship = shipScene.rootNode.childNodes.first
@@ -72,15 +73,6 @@ extension ARSceneManager: ARSCNViewDelegate {
             print(ang)
             
             self.ship?.eulerAngles.z = ang
-            
-            //                if ang < 10{
-            //                    print("GO Straight")
-            //                }
-            //
-            //                else{
-            //                    print("Turn!")
-            //                }
-            ///HOW CAN YOU UPDATE THE EULER ANGLE AS IT IS CALCULATED? I WANT THE ARRROW TO MOVE FLUIDLY
         }
     }
     
@@ -93,22 +85,9 @@ extension ARSceneManager: ARSCNViewDelegate {
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
-        
         planes.removeValue(forKey: anchor.identifier)
         node.enumerateChildNodes { (ship, _) in
             ship.removeFromParentNode()
         }
     }
-    
-    func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first!
-        let location = touch.location(in: sceneView)
-        let hitResults = sceneView?.hitTest(location, options: nil)
-        if hitResults!.count > 0 {
-            print("touched")
-            
-            self.ship?.eulerAngles.z = 0
-        }
-    }
 }
-
