@@ -40,14 +40,14 @@ extension ARSceneManager: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         DispatchQueue.main.async {
-            
-            let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
-            self.ship = shipScene.rootNode.childNodes.first
-            node.addChildNode(self.ship!)
-            
-            self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
-            
-            self.sceneView?.pointOfView?.addChildNode(self.ship!)
+            if(self.ship == nil){
+                let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
+                self.ship = shipScene.rootNode.childNodes.first
+                node.addChildNode(self.ship!)
+                self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
+                
+                self.sceneView?.pointOfView?.addChildNode(self.ship!)
+            }
             
             guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
             
@@ -68,34 +68,47 @@ extension ARSceneManager: ARSCNViewDelegate {
             let nz2 = point2.z
             
             var ang = atan2(nz2-nz1, nx2-nx1)
-            ang = ang * 180 / .pi
+            ang = ang * -180 / .pi
             print(ang)
             
             self.ship?.eulerAngles.z = ang
+            
+            //                if ang < 10{
+            //                    print("GO Straight")
+            //                }
+            //
+            //                else{
+            //                    print("Turn!")
+            //                }
             ///HOW CAN YOU UPDATE THE EULER ANGLE AS IT IS CALCULATED? I WANT THE ARRROW TO MOVE FLUIDLY
-
-            //Use an arrow to be positioned at the angle of the viewer and then to turn until the angles = one another
         }
     }
-
+    
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
         
         if let plane = planes[planeAnchor.identifier] {
             plane.updateWith(anchor: planeAnchor)
         }
-        
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
         
         planes.removeValue(forKey: anchor.identifier)
-        
+        node.enumerateChildNodes { (ship, _) in
+            ship.removeFromParentNode()
+        }
     }
     
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        
+    func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first!
+        let location = touch.location(in: sceneView)
+        let hitResults = sceneView?.hitTest(location, options: nil)
+        if hitResults!.count > 0 {
+            print("touched")
+            
+            self.ship?.eulerAngles.z = 0
+        }
     }
 }
 
-//        determine angle of rotation from Swift in ARKit

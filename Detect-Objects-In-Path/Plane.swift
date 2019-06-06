@@ -34,15 +34,14 @@ class Plane: SCNNode {
     }
         
         func updateWith(anchor: ARPlaneAnchor) {
-    /*
-        Create white grid along horizontal surfaces and keep the grid--don't update new everytime
-    */
+
             plane.width = CGFloat(anchor.extent.x)
             plane.height = CGFloat(anchor.extent.z)
             
             if let grid = plane.materials.first as? GridMaterial {
                 grid.updateWith(anchor: anchor)
             }
+            
             position = SCNVector3Make(anchor.center.x, 0, anchor.center.z)
     }
 }
