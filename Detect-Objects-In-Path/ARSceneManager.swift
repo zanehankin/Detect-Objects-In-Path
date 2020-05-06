@@ -10,7 +10,7 @@ import ARKit
 
 class ARSceneManager: NSObject{
     
-    weak var sceneView: ARSCNView?
+    var sceneView: ARSCNView?
     private var planes = [UUID: Plane]()
     var existingVerticalPlane: ARHitTestResult.ResultType = []
     
@@ -36,11 +36,19 @@ class ARSceneManager: NSObject{
         
         sceneView.session.run(configuration)
     }
+    //    var camera = SCNCamera?
+    
+    var startingPositionNode: SCNNode?
+    var endingPositionNode: SCNCamera?
+    
+    let RelPosition = SCNVector3Make(0,0,-0.1)
+    
 }
 
 extension ARSceneManager: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor){
+        
         DispatchQueue.main.async {
             
             if(self.ship == nil){
@@ -48,7 +56,6 @@ extension ARSceneManager: ARSCNViewDelegate {
                 self.ship = shipScene.rootNode.childNodes.first
                 node.addChildNode(self.ship!)
                 self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
-                
                 self.sceneView?.pointOfView?.addChildNode(self.ship!)
             }
             
@@ -57,6 +64,7 @@ extension ARSceneManager: ARSCNViewDelegate {
             print("Found plane: \(planeAnchor)")
             
             let plane = Plane(anchor: planeAnchor)
+            
             self.planes[anchor.identifier] = plane
             node.addChildNode(plane)
             
@@ -66,46 +74,52 @@ extension ARSceneManager: ARSCNViewDelegate {
             
             let nx1 = point1.x
             let nz1 = point1.z
+            print("nx1: ", nx1)
+            print("nz1: ", nz1)
             
             let nx2 = point2.x
             let nz2 = point2.z
+            print("nx2: ", nx2)
+            print("nz2: ", nz2)
             
             var ang = atan2(nz2-nz1, nx2-nx1)
             ang = ang * -180 / .pi
-            print(ang)
+            print("ang: ", ang)
             
-            let roundedAng = String(format: "%.2f", abs(90-ang))
+            let EAngle = (90-ang)
+            print("EAngle: ", EAngle)
             
-            //if rounded ang is < 90 turn the euler ang towards 90?
+            let roundedAng = String(format: "%.2f", EAngle)
+            print("roundedAng: ", roundedAng)
             
-            //needs to be 90 degrees
-            var EAngle = (90-ang)
             self.ship?.eulerAngles.z = abs(EAngle)
             
-//            if EAngle < -80 || EAngle < 80{
-//                EAngle += 1
-//                self.ship?.eulerAngles.z = EAngle
-//            }
-            
-            if ang < 0 || ang < -80 {
+            if EAngle < 0 && EAngle > -80 {
                 print("Turn Left")
                 self.sentence = "Turn Left \(roundedAng) Degrees"
                 self.speakText()
             }
                 
-            else if ang > 0 || ang < 80{
+            else if EAngle > 0 && EAngle < 80{
                 print("Turn Right")
                 self.sentence = "Turn Right\(roundedAng) Degrees"
                 self.speakText()
             }
                 
             else{
-                print("Back Up and Turn 90 Degrees")
+                print("Back Up and Turn Around 90 Degrees")
                 self.sentence = "Back Up and Turn 90 Degrees"
                 self.speakText()
             }
         }
     }
+    
+    //    func addNode(){
+    //
+    //        let shapeNode = SCNNode()
+    //        shapeNode.geometry = SCNTube(innerRadius: 0.10, outerRadius: 0.10, height: 0.10)
+    //        shapeNode.position = SCNVector3Make(0, 0, 0)
+    //    }
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
@@ -117,18 +131,85 @@ extension ARSceneManager: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
         planes.removeValue(forKey: anchor.identifier)
-        node.enumerateChildNodes { (ship, _) in
+        node.enumerateChildNodes {
+            (ship, _) in
             ship.removeFromParentNode()
         }
     }
     
     func speakText(){
-        let synth = AVSpeechSynthesizer()
+        let synth1 = AVSpeechSynthesizer()
         let utterance = AVSpeechUtterance(string: sentence)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         
-        if(!synth.isSpeaking){
-            synth.speak(utterance)
+        if(!synth1.isSpeaking){
+            synth1.speak(utterance)
         }
     }
-}
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        
+        if startingPositionNode != nil && endingPositionNode != nil {
+            return
+        }
+        
+        guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, view: sceneView!, RelPosition: RelPosition)?.x else {return}
+        
+        guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, view: sceneView!, RelPosition: RelPosition)?.y else {return}
+        
+        guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, view: sceneView!, RelPosition: RelPosition)?.z else {return}
+        
+        DispatchQueue.main.async {
+//            var distSentence = String(format:"Distance: %.2f", CalculatingDistance.distance(x: xDist, y: yDist, z: zDist)) + "m"
+            
+            let distExt = CalculatingDistance()
+            
+            let distSentence = String(format: "%.2f", distExt.ReturnDistance(x: xDist, y: yDist, z: zDist))
+            
+            print("distSentence: ", distSentence)
+            
+//            func speakDist(){
+//                let synth2 = AVSpeechSynthesizer()
+//                let utterance = AVSpeechUtterance(string: distSentence)
+//                utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+                
+                
+                /* How to write an if statement to talk when the value is below a certain value?*/
+//                print (CalculatingDistance.dist)
+                
+                //                if (dist < 2){
+                //                    synth.speak(utterance)
+                //                }
+                
+                //                else if(
+                
+                //                if(!synth.isSpeaking){
+                //                        synth.speak(utterance)
+                //                }
+            }
+        }
+    }
+
+
+
+
+//DispatchQueue.main.asyncAfter(deadline: .now() + 2.5){
+//    self.ship!.removeFromParentNode()
+//
+//}
+
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5){
+//                let EAngle = (90)
+//                self.ship?.eulerAngles.z = Float(abs(EAngle))
+//            }
+
+//            func removeFromParent(){
+//                node.removeChildNode(self.ship!)
+//                node.removeChildNode(plane)
+//            }
+
+/* Below is the code that removes the node. The problem is that I don't know how to then re-add an arrow node*/
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5){
+//                self.ship!.removeFromParentNode()
+//            }
+/* */

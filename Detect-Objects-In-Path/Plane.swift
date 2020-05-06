@@ -24,7 +24,7 @@ class Plane: SCNNode {
         let planeNode = SCNNode(geometry: plane)
         planeNode.position = SCNVector3Make(anchor.center.x, 0, anchor.center.z)
         planeNode.eulerAngles.x = -.pi / 2
-        planeNode.opacity = 0.15
+        planeNode.opacity = 0.25
         addChildNode(planeNode)
     }
     
@@ -32,6 +32,7 @@ class Plane: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /* Use this to update new plane?*/
     func updateWith(anchor: ARPlaneAnchor) {
         
         plane.width = CGFloat(anchor.extent.x)

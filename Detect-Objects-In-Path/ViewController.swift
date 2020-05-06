@@ -5,7 +5,7 @@
 //  Created by Zane Hankin on 5/15/19.
 //  Copyright © 2019 Zane Hankin. All rights reserved.
 //
-//Help from tutorial https://collectiveidea.com/blog/archives/2018/04/30/part-1-arkit-wall-and-plane-detection-for-ios-11.3, Paul Way, and my boy Jack Welch
+//Help from tutorial https://collectiveidea.com/blog/archives/2018/04/30/part-1-arkit-wall-and-plane-detection-for-ios-11.3, Paul Way, and Jack Welch
 //
 
 import UIKit
@@ -27,6 +27,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneManager.attach(to: sceneView)
         
         sceneManager.displayDebugInfo()
+        
+        print("Starting Program")
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
