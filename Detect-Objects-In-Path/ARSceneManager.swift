@@ -29,8 +29,9 @@ class ARSceneManager: NSObject{
         sceneView?.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin]
     }
     
-    private func configureSceneView(_ sceneView: ARSCNView) {
-        let configuration = ARWorldTrackingConfiguration()
+    let configuration = ARWorldTrackingConfiguration()
+    
+    func configureSceneView(_ sceneView: ARSCNView) {
         configuration.planeDetection = [.vertical]
         configuration.isLightEstimationEnabled = true
         
@@ -49,8 +50,7 @@ extension ARSceneManager: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor){
         
-        DispatchQueue.main.async {
-            
+//        DispatchQueue.main.async {
             if(self.ship == nil){
                 let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
                 self.ship = shipScene.rootNode.childNodes.first
@@ -82,8 +82,11 @@ extension ARSceneManager: ARSCNViewDelegate {
             print("nx2: ", nx2)
             print("nz2: ", nz2)
             
-            var ang = atan2(nz2-nz1, nx2-nx1)
-            ang = ang * -180 / .pi
+            let deltaNX = nx2-nx1
+            let deltaNZ = nz2-nz1
+            
+            let ang = atan2(deltaNZ, deltaNX)
+            //            ang = ang * -180 / .pi
             print("ang: ", ang)
             
             let EAngle = (90-ang)
@@ -98,7 +101,7 @@ extension ARSceneManager: ARSCNViewDelegate {
                 print("Turn Left")
                 self.sentence = "Turn Left \(roundedAng) Degrees"
                 self.speakText()
-            }
+            } 
                 
             else if EAngle > 0 && EAngle < 80{
                 print("Turn Right")
@@ -107,19 +110,32 @@ extension ARSceneManager: ARSCNViewDelegate {
             }
                 
             else{
-                print("Back Up and Turn Around 90 Degrees")
-                self.sentence = "Back Up and Turn 90 Degrees"
+                print("Turn 90 Degrees")
+                self.sentence = "Turn 90 Degrees"
                 self.speakText()
-            }
         }
     }
     
-    //    func addNode(){
-    //
-    //        let shapeNode = SCNNode()
-    //        shapeNode.geometry = SCNTube(innerRadius: 0.10, outerRadius: 0.10, height: 0.10)
-    //        shapeNode.position = SCNVector3Make(0, 0, 0)
-    //    }
+    func addBoxNode(){
+        let box = SCNBox(width: 2.1, height: 2.1, length: 2.1, chamferRadius: 0)
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor.red
+        box.materials = [material]
+        let boxNode = SCNNode(geometry: box)
+        
+        /* Assign position to that of the plane anchor?*/
+        //        shapeNode.position = SCNVector3(0.0, 0.0, -0.3)
+        
+//        let boxPositionX = Plane().planePositionX
+        //            let boxPositionZ =
+        
+        boxNode.position = SCNVector3Make(0, 0, -30)
+        
+        sceneView?.scene.rootNode.addChildNode(boxNode)
+        print("box node added")
+        //        arView.scene.rootNode.addChildNode(shapeNode)
+        
+    }
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
@@ -159,8 +175,8 @@ extension ARSceneManager: ARSCNViewDelegate {
         
         guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, view: sceneView!, RelPosition: RelPosition)?.z else {return}
         
-        DispatchQueue.main.async {
-//            var distSentence = String(format:"Distance: %.2f", CalculatingDistance.distance(x: xDist, y: yDist, z: zDist)) + "m"
+//        DispatchQueue.main.async {
+            //            var distSentence = String(format:"Distance: %.2f", CalculatingDistance.distance(x: xDist, y: yDist, z: zDist)) + "m"
             
             let distExt = CalculatingDistance()
             
@@ -168,27 +184,36 @@ extension ARSceneManager: ARSCNViewDelegate {
             
             print("distSentence: ", distSentence)
             
-//            func speakDist(){
-//                let synth2 = AVSpeechSynthesizer()
-//                let utterance = AVSpeechUtterance(string: distSentence)
-//                utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-                
-                
-                /* How to write an if statement to talk when the value is below a certain value?*/
-//                print (CalculatingDistance.dist)
-                
-                //                if (dist < 2){
-                //                    synth.speak(utterance)
-                //                }
-                
-                //                else if(
-                
-                //                if(!synth.isSpeaking){
-                //                        synth.speak(utterance)
-                //                }
-            }
-        }
+            //            func speakDist(){
+            //                let synth2 = AVSpeechSynthesizer()
+            //                let utterance = AVSpeechUtterance(string: distSentence)
+            //                utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+            
+            
+            /* How to write an if statement to talk when the value is below a certain value?*/
+            //                print (CalculatingDistance.dist)
+            
+            //                if (dist < 2){
+            //                    synth.speak(utterance)
+            //                }
+            
+            //                else if(
+            
+            //                if(!synth.isSpeaking){
+            //                        synth.speak(utterance)
+            //                }
+        // }
     }
+    
+    func resetScene() {
+        sceneView?.session.pause()
+        sceneView?.scene.rootNode.enumerateChildNodes { (node, _) in
+            ship?.removeFromParentNode()
+        }
+        sceneView?.session.run(configuration, options: [.removeExistingAnchors, .resetTracking])
+    }
+    
+}
 
 
 

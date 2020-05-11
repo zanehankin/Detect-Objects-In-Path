@@ -12,7 +12,11 @@ import ARKit
 
 class CalculatingDistance: NSObject{
     
-   static func distance (fromStartingPositionNode: SCNNode?, view: ARSCNView, RelPosition: SCNVector3) -> SCNVector3? {
+    static func addBoxChildNode (_ node: SCNNode, toNode: SCNNode, inView: ARSCNView, cameraRelativePosition: SCNVector3){
+        
+    }
+    
+    static func distance (fromStartingPositionNode: SCNNode?, view: ARSCNView, RelPosition: SCNVector3) -> SCNVector3? {
         
         guard let startingPosition = fromStartingPositionNode else {return nil}
         
