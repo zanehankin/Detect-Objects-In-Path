@@ -11,7 +11,7 @@ import ARKit
 
 class Plane: SCNNode {
     
-    let plane: SCNPlane
+    var plane = SCNPlane()
     
     init(anchor: ARPlaneAnchor) {
         plane = SCNPlane(width: CGFloat(anchor.extent.x), height: CGFloat(anchor.extent.z))
@@ -25,7 +25,7 @@ class Plane: SCNNode {
         
         let planePositionX = anchor.center.x
         let planePositionZ = anchor.center.z
-
+        
         planeNode.position = SCNVector3Make(planePositionX, 0, planePositionZ)
         planeNode.eulerAngles.x = -.pi / 2
         planeNode.opacity = 0.25
@@ -36,7 +36,6 @@ class Plane: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    /* Use this to update new plane?*/
     func updateWith(anchor: ARPlaneAnchor) {
         
         plane.width  = CGFloat(anchor.extent.x)
@@ -49,3 +48,49 @@ class Plane: SCNNode {
         }
     }
 }
+
+/* This is the end of the file's active code*/
+
+
+
+//extension Plane: ARSCNViewDelegate{
+
+//    func addBoxEToPlane(){
+//        let boxE = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
+//        boxE.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+//    }
+//
+//     func addBoxENodeToPlane(anchor: ARPlaneAnchor){
+//        let XCoord = (plane.width)/2
+//        let YCoord = (plane.height)/2
+//        let ZCoord = (anchor.extent.z)
+//
+////        let boxE = SCNBox()
+////        let material = SCNMaterial()
+////        material.diffuse.contents = UIColor.red
+////        boxE.materials = [material]
+////        let boxENode = SCNNode(geometry: boxE)
+////        boxE.position = SCNVector3Make(Float(XCoord), Float(YCoord), ZCoord)
+//
+//        let boxPreE = SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0)
+//        let material = SCNMaterial()
+//        material.diffuse.contents = UIColor.red
+//        boxPreE.materials = [material]
+//        let boxENode = SCNNode(geometry: boxPreE)
+//        boxENode.position = SCNVector3Make(Float(XCoord), Float(YCoord), ZCoord)
+//
+//        print("box node added")
+
+//            boxENode.position = SCNVector3Make(0, 0, 0)
+
+//                sceneView.scene.rootNode.addChildNode(boxENode)
+
+/* need to add a fukin box node to the ARPlane AND to the fuckin camera*/
+
+//    func checkBox(){
+//        if SCNBox == true {
+//
+//        }
+//        print("box node added")
+//    }
+

@@ -12,41 +12,76 @@ import ARKit
 
 class CalculatingDistance: NSObject{
     
-    static func addBoxChildNode (_ node: SCNNode, toNode: SCNNode, inView: ARSCNView, cameraRelativePosition: SCNVector3){
+    static func addBoxChildNode (_ node: SCNNode, toNode: SCNNode, inView: ARSCNView, camRelPosition: SCNVector3){
         
+        guard let currentFrame = inView.session.currentFrame else {return}
+        
+        let camera = currentFrame.camera
+        let transform = camera.transform
+        
+        var translateMatrix = matrix_identity_float4x4
+        
+        translateMatrix.columns.3.x = camRelPosition.x
+        translateMatrix.columns.3.y = camRelPosition.y
+        translateMatrix.columns.3.z = camRelPosition.z
+        
+        let newMatrix = simd_mul(transform, translateMatrix)
+        node.simdTransform = newMatrix
+        toNode.addChildNode(node)
     }
     
-    static func distance (fromStartingPositionNode: SCNNode?, view: ARSCNView, RelPosition: SCNVector3) -> SCNVector3? {
+//    static func addPlaneNode (_ plane: SCNPlane, toPlane: SCNPlane, inView: ARSCNView, camRelPosition: SCNVector3){
+//
+////        guard let currentFrame = inView.session.currentFrame else {return}
+//
+/////        let transform = camera.transform
+//
+//        var translateMatrix = matrix_identity_float4x4
+//
+//        translateMatrix.columns.3.x = camRelPosition.x
+//        translateMatrix.columns.3.y = camRelPosition.y
+//        translateMatrix.columns.3.z = camRelPosition.z
+//
+////        let newMatrix = simd_mul(transform, translateMatrix)
+//
+////        plane.simdTransform = newMatrix
+////        toPlane.addChildNode(plane)
+//    }
+    
+    static func distance (fromStartingPositionNode: SCNNode?, onView: ARSCNView, camRelPosition: SCNVector3) -> SCNVector3? {
         
         guard let startingPosition = fromStartingPositionNode else {return nil}
         
-        guard let currentFrame = view.session.currentFrame else {return nil}
+        guard let currentFrame = onView.session.currentFrame else {return nil}
         
         let camera = currentFrame.camera
-        
         let transform = camera.transform
         
-        var matrices = matrix_identity_float4x4
+        var translateMatrix = matrix_identity_float4x4
         //^derived from stackoverflow explanation on accessing coordinates using the camera
         
-        matrices.columns.3.x = RelPosition.x
-        matrices.columns.3.y = RelPosition.y
-        matrices.columns.3.z = RelPosition.z
+        translateMatrix.columns.3.x = camRelPosition.x
+        translateMatrix.columns.3.y = camRelPosition.y
+        translateMatrix.columns.3.z = camRelPosition.z
         
-        let modifiedMatrix = simd_mul(transform, matrices)
+        let newMatrix = simd_mul(transform, translateMatrix)
         /* Accesing the coordinates of the matrices with the camera. "transform" accesses real world coordinates, allowing the data to find dist  */
         
-        let xDist = modifiedMatrix.columns.3.x - startingPosition.position.x
-        let yDist = modifiedMatrix.columns.3.y - startingPosition.position.y
-        let zDist = modifiedMatrix.columns.3.z - startingPosition.position.z
+        let xDist = newMatrix.columns.3.x - startingPosition.position.x
+        let yDist = newMatrix.columns.3.y - startingPosition.position.y
+        let zDist = newMatrix.columns.3.z - startingPosition.position.z
         
         return SCNVector3(xDist, yDist, zDist)
     }
     
-    func ReturnDistance(x: Float, y: Float, z: Float) -> Float {
+    static func ReturnDistance(x: Float, y: Float, z: Float) -> Float {
         
         let dist = (sqrtf(x*x + y*y + z*z))
         
         return dist
     }
 }
+
+/* This is the end of the file*/
+
+

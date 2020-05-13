@@ -38,3 +38,7 @@ class GridMaterial: SCNMaterial {
         diffuse.contentsTransform = SCNMatrix4MakeScale(anchor.extent.x * repeatAmount, anchor.extent.z * repeatAmount, 1)
     }
 }
+
+/* This is the end of the file */
+
+
