@@ -30,24 +30,6 @@ class CalculatingDistance: NSObject{
         toNode.addChildNode(node)
     }
     
-//    static func addPlaneNode (_ plane: SCNPlane, toPlane: SCNPlane, inView: ARSCNView, camRelPosition: SCNVector3){
-//
-////        guard let currentFrame = inView.session.currentFrame else {return}
-//
-/////        let transform = camera.transform
-//
-//        var translateMatrix = matrix_identity_float4x4
-//
-//        translateMatrix.columns.3.x = camRelPosition.x
-//        translateMatrix.columns.3.y = camRelPosition.y
-//        translateMatrix.columns.3.z = camRelPosition.z
-//
-////        let newMatrix = simd_mul(transform, translateMatrix)
-//
-////        plane.simdTransform = newMatrix
-////        toPlane.addChildNode(plane)
-//    }
-    
     static func distance (fromStartingPositionNode: SCNNode?, onView: ARSCNView, camRelPosition: SCNVector3) -> SCNVector3? {
         
         guard let startingPosition = fromStartingPositionNode else {return nil}

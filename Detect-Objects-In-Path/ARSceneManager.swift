@@ -33,7 +33,17 @@ class ARSceneManager: NSObject {
     
     // endingPositionNode will be positioned at the camera
     
-    let camRelPosition = SCNVector3Make(0,0,-0.1)
+    let camRelPosition = SCNVector3Make(0,0,0)
+    let configuration = ARWorldTrackingConfiguration()
+    
+    func configureSceneView(_ sceneView: ARSCNView) {
+        //            let cameraAlignment: ARConfiguration.WorldAlignment
+        
+        configuration.planeDetection = [.vertical]
+        configuration.isLightEstimationEnabled = true
+        
+        sceneView.session.run(configuration)
+    }
     
     func attach(to sceneView: ARSCNView){
         self.sceneView = sceneView
@@ -45,33 +55,9 @@ class ARSceneManager: NSObject {
         sceneView.showsStatistics = true
         sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin]
     }
-    
-    let configuration = ARWorldTrackingConfiguration()
-    
-    func configureSceneView(_ sceneView: ARSCNView) {
-        configuration.planeDetection = [.vertical]
-        configuration.isLightEstimationEnabled = true
-        
-        sceneView.session.run(configuration)
-    }
 }
 
 extension ARSceneManager: ARSCNViewDelegate {
-    
-    //        func addBoxENode(){
-    //            let boxE = SCNBox(width: 2.1, height: 2.1, length: 2.1, chamferRadius: 0)
-    //            let material = SCNMaterial()
-    //            material.diffuse.contents = UIColor.red
-    //            boxE.materials = [material]
-    //            let boxENode = SCNNode(geometry: boxE)
-    //
-    ////            boxENode.position = SCNVector3Make(0, 0, 0)
-    //
-    //            sceneView.scene.rootNode.addChildNode(boxENode)
-    //            print("box node added")
-    //
-    //            /* need to add a fukin box node to the ARPlane AND to the fuckin camera*/
-    //        }
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor){
         //    DispatchQueue.main.async {
@@ -160,6 +146,21 @@ extension ARSceneManager: ARSCNViewDelegate {
         }
     }
     
+    func addBoxSNode(){
+        let boxS = SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0)
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor.red
+        boxS.materials = [material]
+        let boxENode = SCNNode(geometry: boxS)
+        
+        //            boxENode.position = SCNVector3Make(0, 0, 0)
+        
+        sceneView.scene.rootNode.addChildNode(boxENode)
+        print("box node added")
+        
+        /* need to add a fukin box node to the ARPlane AND to the fuckin camera*/
+    }
+    
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         
         //        var checkPlaneAnchor = false
@@ -190,16 +191,21 @@ extension ARSceneManager: ARSCNViewDelegate {
         if startingPositionNode == nil && endingPosition == nil{
             let boxS = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
             boxS.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+            //            boxS.position = camRelPosition
+            boxS.camera = SCNCamera()
+            boxS.position = SCNVector3()
             
             let plane = SCNPlane()
+            
             /* Can I run the function that adds Planes?? Do I need to??*/
             
-            CalculatingDistance.addBoxChildNode(boxS, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
-            //            CalculatingDistance.addPlaneNode(plane, toPlane: SCNPlane, inView: sceneView, camRelPosition: camRelPosition)
+            //            let boxS = sceneView.pointOfView?.position
             
             /* ?? What is 'toNode:' ?? */
-            //            CalculatingDistance.addBoxEChildNode(boxE, toPlane: sceneView., inView: sceneView, camRelPosition: camRelPosition)
             
+            CalculatingDistance.addBoxChildNode(boxS, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
+            self.sceneView.pointOfView?.addChildNode(boxS)
+
             startingPositionNode = boxS
             endingPosition = plane
         }
@@ -219,6 +225,7 @@ extension ARSceneManager: ARSCNViewDelegate {
     }
     
     /* IF there is a plane node and ship node, THEN you can reset it*/
+    /*NEED TO CALL TO THIS FUNCTION SOMEWHERE!!*/
     func resetScene() {
         sceneView.session.pause()
         
