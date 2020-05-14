@@ -14,6 +14,7 @@
 		E50EB484228C8FA100A0803D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E50EB483228C8FA100A0803D /* Assets.xcassets */; };
 		E50EB487228C8FA100A0803D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E50EB485228C8FA100A0803D /* LaunchScreen.storyboard */; };
 		E5432E62246349F9006DDDDE /* CalculatingDistance.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5432E61246349F9006DDDDE /* CalculatingDistance.swift */; };
+		E5432E64246DBB20006DDDDE /* CheckAngles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5432E63246DBB20006DDDDE /* CheckAngles.swift */; };
 		E57D1101229325BD00CE4CD4 /* ARSceneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1100229325BC00CE4CD4 /* ARSceneManager.swift */; };
 		E57D1103229776B800CE4CD4 /* Plane.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1102229776B800CE4CD4 /* Plane.swift */; };
 		E57D11052297796600CE4CD4 /* GridMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D11042297796600CE4CD4 /* GridMaterial.swift */; };
@@ -29,6 +30,7 @@
 		E50EB486228C8FA100A0803D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E50EB488228C8FA100A0803D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E5432E61246349F9006DDDDE /* CalculatingDistance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatingDistance.swift; sourceTree = "<group>"; };
+		E5432E63246DBB20006DDDDE /* CheckAngles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckAngles.swift; sourceTree = "<group>"; };
 		E57D1100229325BC00CE4CD4 /* ARSceneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSceneManager.swift; sourceTree = "<group>"; };
 		E57D1102229776B800CE4CD4 /* Plane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plane.swift; sourceTree = "<group>"; };
 		E57D11042297796600CE4CD4 /* GridMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridMaterial.swift; sourceTree = "<group>"; };
@@ -64,10 +66,11 @@
 		E50EB479228C8F9D00A0803D /* Detect-Objects-In-Path */ = {
 			isa = PBXGroup;
 			children = (
-				E50EB47A228C8F9D00A0803D /* AppDelegate.swift */,
 				E50EB480228C8F9D00A0803D /* Main.storyboard */,
+				E50EB47A228C8F9D00A0803D /* AppDelegate.swift */,
 				E50EB47E228C8F9D00A0803D /* ViewController.swift */,
 				E57D1100229325BC00CE4CD4 /* ARSceneManager.swift */,
+				E5432E63246DBB20006DDDDE /* CheckAngles.swift */,
 				E5432E61246349F9006DDDDE /* CalculatingDistance.swift */,
 				E57D1102229776B800CE4CD4 /* Plane.swift */,
 				E57D11042297796600CE4CD4 /* GridMaterial.swift */,
@@ -157,6 +160,7 @@
 				E50EB47F228C8F9D00A0803D /* ViewController.swift in Sources */,
 				E57D1103229776B800CE4CD4 /* Plane.swift in Sources */,
 				E50EB47B228C8F9D00A0803D /* AppDelegate.swift in Sources */,
+				E5432E64246DBB20006DDDDE /* CheckAngles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

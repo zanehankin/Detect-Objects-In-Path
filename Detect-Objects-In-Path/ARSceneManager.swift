@@ -26,10 +26,13 @@ class ARSceneManager: NSObject {
     
     var ship: SCNNode? = nil
     
-    var sentence = ""
+    var sentence1 = ""
+    var sentence2 = ""
     
     var startingPositionNode: SCNNode?
     var endingPosition: SCNPlane?
+    
+    var lastDeterminedAngle = 0
     
     // endingPositionNode will be positioned at the camera
     
@@ -57,10 +60,15 @@ class ARSceneManager: NSObject {
     }
 }
 
+//
+
 extension ARSceneManager: ARSCNViewDelegate {
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor, point: CGPoint) {
+        applyAngle(for: node, anchor: anchor, point: point)
+    }
     
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor){
-        //    DispatchQueue.main.async {
+    func applyAngle(for node: SCNNode, anchor: ARAnchor, point: CGPoint){
+        
         if(self.ship == nil){
             let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
             self.ship = shipScene.rootNode.childNodes.first
@@ -70,87 +78,47 @@ extension ARSceneManager: ARSCNViewDelegate {
             
             self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
             self.sceneView.pointOfView?.addChildNode(self.ship!)
-            
             /* Maybe make the ship nil so that it goes away?*/
             //            self.ship != nil
         }
         
-        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        //        node.addChildNode(plane)
         
-        print("Found plane: \(planeAnchor)")
+        let roundedAng = CheckAngles.checkAnglesFunc(for: node, anchor: anchor)
         
-        let plane = Plane(anchor: planeAnchor)
-        //        let planeName = plane.name
-        //        plane.name = "nameTest"
+        let results = sceneView.hitTest(point, types: .existingPlane)
         
-        self.planes[anchor.identifier] = plane
-        node.addChildNode(plane)
-        //        addBoxENode()
+            if results.count < 1 {
+                self.ship?.eulerAngles.z = roundedAng
+            }
+                
+            else {
+                self.ship?.eulerAngles.z = 0
+                print ("Angle Reset")
+            }
         
-//        var translateMatrix = matrix_identity_float4x4
-        //^derived from stackoverflow explanation on accessing coordinates using the camera
-        
-//        translateMatrix.columns.3.x = camRelPosition.x
-//        translateMatrix.columns.3.y = camRelPosition.y
-//        translateMatrix.columns.3.z = camRelPosition.z
-        
-//        let newMatrix = simd_mul(transform, translateMatrix)
-        
-        // CalculatingDistance.ReturnDistance
-        
-        print(planeAnchor.geometry.boundaryVertices)
-        let point1 = planeAnchor.geometry.boundaryVertices[0]
-        let point2 = planeAnchor.geometry.boundaryVertices[1]
-        
-        let nx1 = point1.x
-        let nz1 = point1.z
-        print("nx1: ", nx1)
-        print("nz1: ", nz1)
-        
-        let nx2 = point2.x
-        let nz2 = point2.z
-        print("nx2: ", nx2)
-        print("nz2: ", nz2)
-        
-        let deltaNX = nx2-nx1
-        let deltaNZ = nz2-nz1
-        
-        var ang = atan2(deltaNZ, deltaNX)
-        
-        ang = ang * -180 / .pi
-        /* Delete line above^ if need be*/
-        print("ang: ", ang)
-        
-        let EAngle = (90-ang)
-        print("EAngle: ", EAngle)
-        
-        let roundedAng = String(format: "%.2f", EAngle)
-        print("roundedAng: ", roundedAng)
-        
-        self.ship?.eulerAngles.z = abs(EAngle)
-        
-        if EAngle < 0 && EAngle > -80 {
+        if roundedAng < 0 && roundedAng > -80 {
             print("Turn Left")
-            self.sentence = "Turn Left \(roundedAng) Degrees"
+            self.sentence1 = "Turn Left \(roundedAng) Degrees"
             self.speakText()
         }
             
-        else if EAngle > 0 && EAngle < 80{
+        else if roundedAng > 0 && roundedAng < 80{
             print("Turn Right")
-            self.sentence = "Turn Right\(roundedAng) Degrees"
+            self.sentence1 = "Turn Right\(roundedAng) Degrees"
             self.speakText()
         }
             
         else{
             print("Turn 90 Degrees")
-            self.sentence = "Turn 90 Degrees"
+            self.sentence1 = "Turn 90 Degrees"
             self.speakText()
         }
-        //    }
     }
     
     func speakText(){
         let synth1 = AVSpeechSynthesizer()
+        let sentence = "\(sentence1) \(sentence2)"
         let utterance = AVSpeechUtterance(string: sentence)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         
@@ -174,33 +142,7 @@ extension ARSceneManager: ARSCNViewDelegate {
         /* need to add a fukin box node to the ARPlane AND to the fuckin camera*/
     }
     
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        
-        //        var checkPlaneAnchor = false
-        //        sceneView.scene.rootNode.enumerateChildNodes
-        //                if planeName == "planeTest"{
-        //                checkPlaneAnchor = true
-        //            }
-        //        }
-        //
-        //        if planeName == "planeTest"{
-        //            endingPositionNode != nil
-        //            startingPositionNode != nil
-        //        }
-        
-        //       if startingPositionNode != nil && endingPositionNode == nil{
-        //            let box = SCNNode(geometry: SCNBox(width: 2.1, height: 2.1, length: 2.1, chamferRadius: 0))
-        //            box.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        //
-        //            CalculatingDistance.addBoxChildNode(box, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
-        //
-        //            endingPositionNode = box
-        //        }
-        
-        //attach to plane annchor?
-        //if statement to only add square when plane anchor is added
-        //distance from planeanchor ONLY
-        
+    func checkDistance(){
         if startingPositionNode == nil && endingPosition == nil{
             let boxS = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
             boxS.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
@@ -210,15 +152,9 @@ extension ARSceneManager: ARSCNViewDelegate {
             
             let plane = SCNPlane()
             
-            /* Can I run the function that adds Planes?? Do I need to??*/
-            
-            //            let boxS = sceneView.pointOfView?.position
-            
-            /* ?? What is 'toNode:' ?? */
-            
             CalculatingDistance.addBoxChildNode(boxS, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
             self.sceneView.pointOfView?.addChildNode(boxS)
-
+            
             startingPositionNode = boxS
             endingPosition = plane
         }
@@ -226,35 +162,40 @@ extension ARSceneManager: ARSCNViewDelegate {
         else {return}
         
         guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.x else {return}
-        
         guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.y else {return}
-        
         guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.z else {return}
         
         DispatchQueue.main.async {
             let distSentence = String(format: "%.2f", CalculatingDistance.ReturnDistance(x: xDist, y: yDist, z: zDist))
             print("distSentence: ", distSentence)
+            self.sentence2 = "Object is within \(distSentence) meters"
+            self.speakText()
         }
     }
     
-    /* IF there is a plane node and ship node, THEN you can reset it*/
-    /*NEED TO CALL TO THIS FUNCTION SOMEWHERE!!*/
-    func resetScene() {
-        sceneView.session.pause()
+    /* Can I run this hit test outside of the func? */
+    func hitTest(_ point: CGPoint, types: ARHitTestResult.ResultType) {
+        let results = sceneView.hitTest(point, types: .existingPlane)
         
-        if(self.ship != nil){
+        if results.count > 1 {
+            sceneView.session.pause()
+            
             ship?.removeFromParentNode()
             planes.removeAll()
-            print ("Ship Is NIL")
-        }
+            print ("Objects REMOVED")
             
-        else {return}
-        
-        //        sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
-        //
-        ////            planes.removeAll()
-        //        }
-        sceneView.session.run(configuration, options: [.removeExistingAnchors])
+            sceneView.session.run(configuration, options: [.removeExistingAnchors])
+        }
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval, node: SCNNode, for anchor: ARAnchor, point: CGPoint) {
+        if (Int(time) - lastDeterminedAngle > 3){
+            applyAngle(for: node, anchor: anchor, point: point)
+            speakText()
+            checkDistance()
+            
+            lastDeterminedAngle = Int(time)
+        }
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
@@ -264,6 +205,7 @@ extension ARSceneManager: ARSCNViewDelegate {
             plane.updateWith(anchor: planeAnchor)
         }
     }
+    
     /* use this to "reset" scene? Remove the certain anchors and nodes??*/
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
         planes.removeValue(forKey: anchor.identifier)
