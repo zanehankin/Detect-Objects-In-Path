@@ -87,6 +87,17 @@ extension ARSceneManager: ARSCNViewDelegate {
         node.addChildNode(plane)
         //        addBoxENode()
         
+//        var translateMatrix = matrix_identity_float4x4
+        //^derived from stackoverflow explanation on accessing coordinates using the camera
+        
+//        translateMatrix.columns.3.x = camRelPosition.x
+//        translateMatrix.columns.3.y = camRelPosition.y
+//        translateMatrix.columns.3.z = camRelPosition.z
+        
+//        let newMatrix = simd_mul(transform, translateMatrix)
+        
+        // CalculatingDistance.ReturnDistance
+        
         print(planeAnchor.geometry.boundaryVertices)
         let point1 = planeAnchor.geometry.boundaryVertices[0]
         let point2 = planeAnchor.geometry.boundaryVertices[1]
@@ -104,8 +115,10 @@ extension ARSceneManager: ARSCNViewDelegate {
         let deltaNX = nx2-nx1
         let deltaNZ = nz2-nz1
         
-        let ang = atan2(deltaNZ, deltaNX)
-        //            ang = ang * -180 / .pi
+        var ang = atan2(deltaNZ, deltaNX)
+        
+        ang = ang * -180 / .pi
+        /* Delete line above^ if need be*/
         print("ang: ", ang)
         
         let EAngle = (90-ang)
