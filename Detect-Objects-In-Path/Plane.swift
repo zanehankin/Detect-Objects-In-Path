@@ -35,7 +35,6 @@ class Plane: SCNNode {
     }
     
     func updateWith(anchor: ARPlaneAnchor) {
-        
         plane.width  = CGFloat(anchor.extent.x)
         plane.height = CGFloat(anchor.extent.z)
         
@@ -44,6 +43,11 @@ class Plane: SCNNode {
         if let grid = plane.materials.first as? GridMaterial {
             grid.updateWith(anchor: anchor)
         }
+    }
+    
+    func returnPlanePosition(anchor: ARPlaneAnchor) -> SCNVector3 {
+        let planePosition = SCNVector3Make(anchor.center.x, 0, anchor.center.z)
+        return planePosition
     }
 }
 
