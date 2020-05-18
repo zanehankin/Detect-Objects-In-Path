@@ -12,6 +12,9 @@ import ARKit
 
 class CalculatingDistance: NSObject{
     
+    //Do I need a separate funnc? What does the
+    //What does the translateMatrix refer to??
+    //Do I need to subtract startingPosition - endingPosition ??
     static func addBoxChildNode (_ node: SCNNode, toNode: SCNNode, inView: ARSCNView, camRelPosition: SCNVector3){
         
         guard let currentFrame = inView.session.currentFrame else {return}

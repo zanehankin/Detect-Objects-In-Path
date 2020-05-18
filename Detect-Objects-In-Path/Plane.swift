@@ -27,6 +27,7 @@ class Plane: SCNNode {
         planeNode.eulerAngles.x = -.pi / 2
         planeNode.opacity = 0.25
         addChildNode(planeNode)
+        planeNode.name = "planeTest"
     }
     
     required init?(coder aDecoder: NSCoder) {

@@ -62,124 +62,137 @@ class ARSceneManager: NSObject {
 extension ARSceneManager: ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-        //, for point: CGPoint
-//        hitTest(point, types: .existingPlaneUsingExtent)
         
-//        DispatchQueue.main.async {
+        //        DispatchQueue.main.async {
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        print("Found plane: \(planeAnchor)")
+        let plane = Plane(anchor: planeAnchor)
+        self.planes[anchor.identifier] = plane
+        node.addChildNode(plane)
+        plane.position = SCNVector3()
+        
+        print(planeAnchor.geometry.boundaryVertices)
+        let point1 = planeAnchor.geometry.boundaryVertices[0]
+        let point2 = planeAnchor.geometry.boundaryVertices[1]
+        
+        let nx1 = point1.x
+        let nz1 = point1.z
+        print("nx1: ", nx1)
+        print("nz1: ", nz1)
+        
+        let nx2 = point2.x
+        let nz2 = point2.z
+        print("nx2: ", nx2)
+        print("nz2: ", nz2)
+        
+        let deltaNX = nx2-nx1
+        let deltaNZ = nz2-nz1
+        
+        var ang = atan2(deltaNZ, deltaNX)
+        
+        ang = ang * -180 / .pi
+        
+        print("ang: ", ang)
+        
+        let EAngle = (90-ang)
+        print("EAngle: ", EAngle)
+        
+        let roundedAng = String(format: "%.2f", EAngle)
+        print("roundedAng: ", roundedAng)
+        
+        if (self.ship == nil) {
+            let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
+            self.ship = shipScene.rootNode.childNodes.first
+            //                node.addChildNode(self.ship!)
+            self.sceneView.scene.rootNode.addChildNode(self.ship!)
+            self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
+            self.sceneView.pointOfView?.addChildNode(self.ship!)
+            /* Maybe make the ship nil so that it goes away?*/
+        }
             
-            guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-            print("Found plane: \(planeAnchor)")
-            let plane = Plane(anchor: planeAnchor)
-            self.planes[anchor.identifier] = plane
-            node.addChildNode(plane)
-            plane.position = SCNVector3()
+        else { print ("Else HitTestResult") }
+        
+        //        DispatchQueue.main.async {
+        //        let hitTestResult = sceneView.hitTest(point, types: .existingPlaneUsingGeometry)
+        //        if hitTestResult.count < 10 {
+        //            self.ship?.eulerAngles.z = EAngle
+        //        }
+        
+        self.ship?.eulerAngles.z = EAngle
+        
+        if (EAngle < 0 && EAngle > -80) {
+            print("Turn Left \(roundedAng) Degrees")
+            self.sentence1 = "Turn Left \(roundedAng) Degrees"
+            self.speakText()
+        }
             
-            print(planeAnchor.geometry.boundaryVertices)
-            let point1 = planeAnchor.geometry.boundaryVertices[0]
-            let point2 = planeAnchor.geometry.boundaryVertices[1]
+        else if (EAngle > 0 && EAngle < 80) {
+            print("Turn Right \(roundedAng) Degrees")
+            self.sentence1 = "Turn Right \(roundedAng) Degrees"
+            self.speakText()
+        }
             
-            let nx1 = point1.x
-            let nz1 = point1.z
-            print("nx1: ", nx1)
-            print("nz1: ", nz1)
-            
-            let nx2 = point2.x
-            let nz2 = point2.z
-            print("nx2: ", nx2)
-            print("nz2: ", nz2)
-            
-            let deltaNX = nx2-nx1
-            let deltaNZ = nz2-nz1
-            
-            var ang = atan2(deltaNZ, deltaNX)
-            
-            /* Delete line below if need be */
-            ang = ang * -180 / .pi
-            /* Delete line above^ if need be*/
-            
-            print("ang: ", ang)
-            
-            let EAngle = (90-ang)
-            print("EAngle: ", EAngle)
-            
-            let roundedAng = String(format: "%.2f", EAngle)
-            print("roundedAng: ", roundedAng)
-            
-            if(self.ship == nil){
-                let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
-                self.ship = shipScene.rootNode.childNodes.first
-                node.addChildNode(self.ship!)
-                self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
-                self.sceneView.pointOfView?.addChildNode(self.ship!)
-                /* Maybe make the ship nil so that it goes away?*/
-                //            self.ship != nil
-            }
-            
-            //            let results = sceneView.hitTest(point, options: nil)
+        else {
+            print("Turn 90 Degrees")
+            self.sentence1 = "Turn 90 Degrees"
+            self.speakText()
+        }
+        
+        /* Below is the code for determining distance*/
+        
+        if (self.startingPositionNode != nil && self.endPositionNode != nil) {
+            self.startingPositionNode?.removeFromParentNode()
+            self.endPositionNode?.removeFromParentNode()
+            self.startingPositionNode = nil
+            self.endPositionNode = nil
+        }
             //
-            //            if results.count <= 1 {
-            //                self.ship?.eulerAngles.z = roundedAng
-            //            }
+        else if (self.startingPositionNode == nil && self.endPositionNode == nil) {
+            let boxS = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
+            boxS.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+            boxS.camera = SCNCamera()
+            boxS.position = SCNVector3()
+            CalculatingDistance.addBoxChildNode(boxS, toNode: self.sceneView.scene.rootNode, inView: self.sceneView, camRelPosition: self.camRelPosition)
+            self.sceneView.pointOfView?.addChildNode(boxS)
             
-            self.ship?.eulerAngles.z = EAngle
             
-            if EAngle < 0 && EAngle > -80 {
-                print("Turn Left")
-                self.sentence1 = "Turn Left \(roundedAng) Degrees"
-                self.speakText()
-            }
-                
-            else if EAngle > 0 && EAngle < 80{
-                print("Turn Right")
-                self.sentence1 = "Turn Right\(roundedAng) Degrees"
-                self.speakText()
-            }
-                
-            else{
-                print("Turn 90 Degrees")
-                self.sentence1 = "Turn 90 Degrees"
-                self.speakText()
-            }
+            let boxE = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
+            boxE.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+            boxE.position = plane.position
             
-//            guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: self.startingPositionNode, onView: self.sceneView, camRelPosition: self.camRelPosition)?.x else {return}
-//            guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: self.startingPositionNode, onView: self.sceneView, camRelPosition: self.camRelPosition)?.y else {return}
-//            guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: self.startingPositionNode, onView: self.sceneView, camRelPosition: self.camRelPosition)?.z else {return}
-//
-//            DispatchQueue.main.async {
-//                let distSentence = String(format: "%.2f", CalculatingDistance.ReturnDistance(x: xDist, y: yDist, z: zDist))
-//                print("distSentence: ", distSentence)
-//                self.sentence2 = "Object is within \(distSentence) meters"
-//                self.speakText()
+            CalculatingDistance.addBoxChildNode(boxE, toNode: self.sceneView.scene.rootNode, inView: self.sceneView, camRelPosition: self.camRelPosition)
+            self.sceneView.scene.rootNode.addChildNode(boxE)
+            
+            self.startingPositionNode = boxS
+            self.endPositionNode = boxE
+            
+        }
+            
+        else {return}
+        
+        guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: self.endPositionNode, onView: self.sceneView, camRelPosition: self.camRelPosition)?.x else {return}
+        guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: self.endPositionNode, onView: self.sceneView, camRelPosition: self.camRelPosition)?.y else {return}
+        guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: self.endPositionNode, onView: self.sceneView, camRelPosition: self.camRelPosition)?.z else {return}
+        
+        let distSentence = String(format: "%.2f", CalculatingDistance.ReturnDistance(x: xDist, y: yDist, z: zDist))
+        print("distSentence: ", distSentence)
+        self.sentence2 = "Object is within \(distSentence) meters"
+        self.speakText()
+        
+            if (self.ship != nil) {
+                delaySeconds(2) {
+                    self.resetScene()
+                }
+            }
+        
+        // OR
+        
+//        if (self.ship != nil) {
+//                DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+//                self.resetScene()
 //            }
-//
-//            if self.startingPositionNode != nil && self.endPositionNode != nil {
-//                self.startingPositionNode?.removeFromParentNode()
-//                self.endPositionNode?.removeFromParentNode()
-//                self.startingPositionNode = nil
-//                self.endPositionNode = nil
-//            }
-//
-//            else if self.startingPositionNode == nil && self.endPositionNode == nil {
-//                let boxS = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
-//                boxS.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-//                boxS.camera = SCNCamera()
-//                boxS.position = SCNVector3()
-//                CalculatingDistance.addBoxChildNode(boxS, toNode: self.sceneView.scene.rootNode, inView: self.sceneView, camRelPosition: self.camRelPosition)
-//                self.sceneView.pointOfView?.addChildNode(boxS)
-//
-//
-//                let boxE = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
-//                boxE.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-//                boxE.position = plane.position
-//
-//                CalculatingDistance.addBoxChildNode(boxE, toNode: self.sceneView.scene.rootNode, inView: self.sceneView, camRelPosition: self.camRelPosition)
-//                self.sceneView.scene.rootNode.addChildNode(boxE)
-//
-//                self.startingPositionNode = boxS
-//                self.endPositionNode = boxE
-//            }
-//            else {return}
 //        }
+
     }
     
     func speakText(){
@@ -191,8 +204,49 @@ extension ARSceneManager: ARSCNViewDelegate {
         if(!synth1.isSpeaking){
             synth1.speak(utterance)
         }
+    
+    }
+        //
+        //
+        /* Fix the delay so that the delay resets after the delay!!*/
+        //
+        //
+    func delaySeconds(_ delay: Double, closure:@escaping ()->()) {
+        let when = DispatchTime.now() + delay
+        DispatchQueue.main.asyncAfter(deadline: when, execute: closure)
     }
     
+    func resetScene(){
+        sceneView.session.pause()
+        ship?.removeFromParentNode()
+        sceneView.session.run(configuration, options: [.removeExistingAnchors, .resetTracking])
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+        
+        if let plane = planes[planeAnchor.identifier] {
+            plane.updateWith(anchor: planeAnchor)
+        }
+    }
+    
+    /* DO I NEED TO RUN A "RESET SCENE FUNCTION??*/
+    func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor, point: CGPoint) {
+        
+        planes.removeValue(forKey: anchor.identifier)
+        node.enumerateChildNodes {
+            (ship, _) in
+            ship.removeFromParentNode()
+        }
+    }
+}
+
+/* This is the end of the file's active code*/
+
+
+
+/* Possible code/ notes are down below: */
+
 //    func checkDistance(for plane: Plane, for anchor: ARPlaneAnchor){
 //        guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.x else {return}
 //        guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.y else {return}
@@ -234,8 +288,8 @@ extension ARSceneManager: ARSCNViewDelegate {
 //        else {return}
 //
 //    }
-    
-    /* Can I run this hit test outside of the func? */
+
+/* Can I run this hit test outside of the func? */
 //    func hitTest(_ point: CGPoint, types: ARHitTestResult.ResultType) {
 //        let results = sceneView.hitTest(point, types: .existingPlaneUsingExtent)
 //
@@ -249,76 +303,52 @@ extension ARSceneManager: ARSCNViewDelegate {
 //            sceneView.session.run(configuration, options: [.removeExistingAnchors])
 //        }
 //    }
-    
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval, node: SCNNode, for anchor: ARPlaneAnchor, point: CGPoint) {
-        
-        guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.x else {return}
-        guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.y else {return}
-        guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.z else {return}
-        
-        DispatchQueue.main.async {
-            let dist = CalculatingDistance.ReturnDistance(x: xDist, y: yDist, z: zDist)
-            let distSentence = String(format: "%.2f", dist)
-            
-            print("distSentence: ", distSentence)
-            self.sentence2 = "Object is within \(distSentence) meters"
-            self.speakText()
-        }
-        
-        if startingPositionNode != nil && endPositionNode != nil {
-            startingPositionNode?.removeFromParentNode()
-            endPositionNode?.removeFromParentNode()
-            startingPositionNode = nil
-            endPositionNode = nil
-        }
-            
-        else if startingPositionNode == nil && endPositionNode == nil {
-            let boxS = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
-            boxS.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-            boxS.camera = SCNCamera()
-            boxS.position = SCNVector3()
-            CalculatingDistance.addBoxChildNode(boxS, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
-            self.sceneView.pointOfView?.addChildNode(boxS)
-            
-            
-            let boxE = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
-            boxE.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-            boxE.position = SCNVector3Make(anchor.center.x, 0, anchor.center.z)
-            CalculatingDistance.addBoxChildNode(boxE, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
-            sceneView.scene.rootNode.addChildNode(boxE)
-            
-            startingPositionNode = boxS
-            endPositionNode = boxE
-        }
-            
-        else {return}
-        //            lastDeterminedAngle = Int(time)
-    }
-    
-    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
-        
-        if let plane = planes[planeAnchor.identifier] {
-            plane.updateWith(anchor: planeAnchor)
-        }
-    }
-    
-    /* DO I NEED TO RUN A "RESET SCENE FUNCTION??*/
-    func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor, point: CGPoint) {
-        
-        planes.removeValue(forKey: anchor.identifier)
-        node.enumerateChildNodes {
-            (ship, _) in
-            ship.removeFromParentNode()
-        }
-    }
-}
 
-/* This is the end of the file's active code*/
+//    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval, node: SCNNode, for anchor: ARPlaneAnchor, point: CGPoint) {
 
+//        guard let xDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.x else {return}
+//        guard let yDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.y else {return}
+//        guard let zDist = CalculatingDistance.distance(fromStartingPositionNode: startingPositionNode, onView: sceneView, camRelPosition: camRelPosition)?.z else {return}
+//
+//        DispatchQueue.main.async {
+//            let dist = CalculatingDistance.ReturnDistance(x: xDist, y: yDist, z: zDist)
+//            let distSentence = String(format: "%.2f", dist)
+//
+//            print("distSentence: ", distSentence)
+//            self.sentence2 = "Object is within \(distSentence) meters"
+//            self.speakText()
+//        }
+//
+//        if startingPositionNode != nil && endPositionNode != nil {
+//            startingPositionNode?.removeFromParentNode()
+//            endPositionNode?.removeFromParentNode()
+//            startingPositionNode = nil
+//            endPositionNode = nil
+//        }
+//
+//        else if startingPositionNode == nil && endPositionNode == nil {
+//            let boxS = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
+//            boxS.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+//            boxS.camera = SCNCamera()
+//            boxS.position = SCNVector3()
+//            CalculatingDistance.addBoxChildNode(boxS, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
+//            self.sceneView.pointOfView?.addChildNode(boxS)
+//
+//
+//            let boxE = SCNNode(geometry: SCNBox(width: 2.0, height: 2.0, length: 2.0, chamferRadius: 0))
+//            boxE.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+//            boxE.position = SCNVector3Make(anchor.center.x, 0, anchor.center.z)
+//            CalculatingDistance.addBoxChildNode(boxE, toNode: sceneView.scene.rootNode, inView: sceneView, camRelPosition: camRelPosition)
+//            sceneView.scene.rootNode.addChildNode(boxE)
+//
+//            startingPositionNode = boxS
+//            endPositionNode = boxE
+//        }
+//
+//        else {return}
+//        //            lastDeterminedAngle = Int(time)
+//    }
 
-
-/* Possible code/ notes are down below: */
 
 //    func applyAngle(for node: SCNNode, anchor: ARAnchor, point: CGPoint){
 
