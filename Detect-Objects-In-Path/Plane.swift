@@ -11,7 +11,7 @@ import ARKit
 
 class Plane: SCNNode {
     
-    var plane = SCNPlane()
+    let plane: SCNPlane
     
     init(anchor: ARPlaneAnchor) {
         plane = SCNPlane(width: CGFloat(anchor.extent.x), height: CGFloat(anchor.extent.z))
@@ -23,10 +23,7 @@ class Plane: SCNNode {
         
         let planeNode = SCNNode(geometry: plane)
         
-        let planePositionX = anchor.center.x
-        let planePositionZ = anchor.center.z
-        
-        planeNode.position = SCNVector3Make(planePositionX, 0, planePositionZ)
+        planeNode.position = SCNVector3Make(anchor.center.x, 0, anchor.center.z)
         planeNode.eulerAngles.x = -.pi / 2
         planeNode.opacity = 0.25
         addChildNode(planeNode)

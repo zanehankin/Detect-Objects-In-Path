@@ -9,9 +9,7 @@
 //
 
 import UIKit
-import SceneKit
 import ARKit
-import AVFoundation
 
 class ViewController: UIViewController, ARSCNViewDelegate {
     
@@ -23,11 +21,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    
         sceneManager.attach(to: sceneView)
-        
         sceneManager.displayDebugInfo()
-        
         print ("starting program")
     }
     
@@ -39,6 +35,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             print("touched")
         }
     }
+    
+    
+    
+    
 }
 
 /* This is the end of the file's active code*/
