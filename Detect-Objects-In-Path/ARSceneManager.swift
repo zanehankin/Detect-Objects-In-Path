@@ -34,7 +34,7 @@ class ARSceneManager: NSObject {
     //    var lastDeterminedAngle = 0
     
     let camRelPosition = SCNVector3Make(0,0,0)
-//    let planePosition = Plane.returnPlanePosition()
+    //    let planePosition = Plane.returnPlanePosition()
     
     let configuration = ARWorldTrackingConfiguration()
     
@@ -47,7 +47,7 @@ class ARSceneManager: NSObject {
     private func configureSceneView(_ sceneView: ARSCNView) {
         configuration.planeDetection = [.vertical]
         configuration.isLightEstimationEnabled = true
-                sceneView.autoenablesDefaultLighting = true
+        sceneView.autoenablesDefaultLighting = true
         sceneView.session.run(configuration)
     }
     
@@ -90,7 +90,7 @@ extension ARSceneManager: ARSCNViewDelegate {
         
         var ang = atan2(deltaNZ, deltaNX)
         
-        ang = ang * -180 / .pi
+        ang = ang * 180 / .pi
         
         print("ang: ", ang)
         
@@ -104,23 +104,31 @@ extension ARSceneManager: ARSCNViewDelegate {
         let roundedAng = EAngle.rounded()
         print("roundedAng: ", roundedAng)
         
-            if (self.ship != nil){
-                self.resetScene()
-            }
+        //            if (self.ship != nil){
+        //                self.resetScene()
+        //            }
+        
+        /* else */ if (self.ship == nil) {
+            let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
+            self.ship = shipScene.rootNode.childNodes.first
+            //                node.addChildNode(self.ship!)
+            self.sceneView.scene.rootNode.addChildNode(self.ship!)
+            self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
+            self.sceneView.pointOfView?.addChildNode(self.ship!)
+            /* Maybe make the ship nil so that it goes away?*/
+            self.ship?.eulerAngles.z = 0
+        }
+        
+        //            else { print ("Else HitTestResult") }
+        
+        if (ang > 89) {
+            print("Turn Left \(roundedAng) Degrees")
+            self.sentence1 = "Turn Left \(roundedAng) Degrees"
+            self.speakText()
+            self.ship?.eulerAngles.z = EAngle
+        }
             
-            else if (self.ship == nil) {
-                let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
-                self.ship = shipScene.rootNode.childNodes.first
-                //                node.addChildNode(self.ship!)
-                self.sceneView.scene.rootNode.addChildNode(self.ship!)
-                self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
-                self.sceneView.pointOfView?.addChildNode(self.ship!)
-                /* Maybe make the ship nil so that it goes away?*/
-            }
-                
-            else { print ("Else HitTestResult") }
-                
-        if (EAngle < 0 && EAngle > -80) {
+        else if (EAngle < 0 && EAngle > -80) {
             print("Turn Left \(roundedAng) Degrees")
             self.sentence1 = "Turn Left \(roundedAng) Degrees"
             self.speakText()
@@ -140,7 +148,7 @@ extension ARSceneManager: ARSCNViewDelegate {
             self.speakText()
         }
         
-/* Below is the code for determining distance*/
+        /* Below is the code for determining distance*/
         
         if (self.startingPositionNode != nil && self.endPositionNode != nil) {
             self.startingPositionNode?.removeFromParentNode()
@@ -167,7 +175,7 @@ extension ARSceneManager: ARSCNViewDelegate {
             let planePosition = plane.position
             boxPlane.position = planePosition
             boxPlane.eulerAngles.x = -.pi / 2
-        
+            
             self.sceneView.scene.rootNode.addChildNode(boxPlane)
             self.startingPositionNode = boxPlane
         }
@@ -193,14 +201,18 @@ extension ARSceneManager: ARSCNViewDelegate {
         if(!synth1.isSpeaking){
             synth1.speak(utterance)
         }
+        //        resetScene()
     }
     
     func resetScene(){
         sceneView.session.pause()
+        ship?.removeAllActions()
         ship?.removeFromParentNode()
-        sceneView.session.run(configuration, options: [.removeExistingAnchors, .resetTracking])
         startingPositionNode?.removeAllActions()
         endPositionNode?.removeAllActions()
+        self.ship = nil
+        
+        sceneView.session.run(configuration, options: [.removeExistingAnchors, .resetTracking])
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
@@ -228,8 +240,8 @@ extension ARSceneManager: ARSCNViewDelegate {
 
 /* Possible code/ notes are down below: */
 
-            //            CalculatingDistance.addBoxChildNode(boxPlane, toNode: self.sceneView.scene.rootNode, inView: self.sceneView, camRelPosition: self.camRelPosition)
-            
+//            CalculatingDistance.addBoxChildNode(boxPlane, toNode: self.sceneView.scene.rootNode, inView: self.sceneView, camRelPosition: self.camRelPosition)
+
 //        else {print ("Boxes Else Statement")}
 
 //
@@ -247,33 +259,33 @@ extension ARSceneManager: ARSCNViewDelegate {
 //        print("distSentence: ", distSentence)
 //        self.sentence2 = "Object is within \(distSentence) meters"
 //        self.speakText()
-    
-    
+
+
 //            if (self.ship != nil) {
 //                delaySeconds(5) {
 //                    self.resetScene()
 //                }
 //            }
-        
-        // OR
-        
+
+// OR
+
 //        if (self.ship != nil) {
 //            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: {
 //                self.resetScene()
 //            })
 //        }
-        
+
 //            DispatchQueue.main.asyncAfter(deadline: .now() + 2 , execute: {
 //                self.resetScene()
 //                self.ship?.addChildNode(self.ship!)
 //            })s
 
 
-        //
-        //
-        /* Fix the delay so that the delay resets after the delay!!*/
-        //
-        //
+//
+//
+/* Fix the delay so that the delay resets after the delay!!*/
+//
+//
 //    func delaySeconds(_ delay: Double, closure: @escaping ()->()) {
 //        let when = DispatchTime.now() + delay
 //        DispatchQueue.main.asyncAfter(deadline: when, execute: closure)
