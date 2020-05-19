@@ -12,11 +12,6 @@ import ARKit
 
 class CalculatingDistance: NSObject{
     
-    // Do I need a separate func?
-    // What does the translateMatrix refer to??
-    // Do I need to subtract startingPosition - endingPosition ??
-    
-    // I believe that this func will translate the object's x,y,z values to be the same of those x,y,z value of the Camera Relative position, which simply means that the shpae node will be placed 10 cm in front of the camera
     static func addBoxCamNode (_ node: SCNNode, toNode: SCNNode, inView: ARSCNView, camRelPosition: SCNVector3){
 
         guard let currentFrame = inView.session.currentFrame else {return}
@@ -57,8 +52,6 @@ class CalculatingDistance: NSObject{
 
         guard let startingPosition = fromStartingPositionNode else {return nil}
 
-//        guard let endPosition = fromEndingPositionNode else {return nil}
-
         guard let currentFrame = onView.session.currentFrame else {return nil}
 
         let camera = currentFrame.camera
@@ -81,6 +74,15 @@ class CalculatingDistance: NSObject{
         return SCNVector3(xDist, yDist, zDist)
     }
     
+    static func ReturnDistance(x: Float, y: Float, z: Float) -> Float {
+        
+        let dist = (sqrtf(x*x + y*y + z*z))
+        return dist
+    }
+}
+
+/* This is the end of the file*/
+
 //    static func distance (fromStartingPositionNode: SCNNode?, toEndPositionNode: SCNNode?, onView: ARSCNView, camRelPosition: SCNVector3) -> SCNVector3? {
 //
 //        guard let startingPosition = fromStartingPositionNode else {return nil}
@@ -92,14 +94,4 @@ class CalculatingDistance: NSObject{
 //
 //        return SCNVector3(xDist, yDist, zDist)
 //    }
-    
-    static func ReturnDistance(x: Float, y: Float, z: Float) -> Float {
-        
-        let dist = (sqrtf(x*x + y*y + z*z))
-        return dist
-    }
-}
-
-/* This is the end of the file*/
-
 

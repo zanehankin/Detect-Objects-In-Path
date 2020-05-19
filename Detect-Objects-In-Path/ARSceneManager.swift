@@ -19,22 +19,7 @@ class ARSceneManager: NSObject {
         return view
     }()
     
-    //    var existingVerticalPlane: ARHitTestResult.ResultType = []
-    
-    var ship: SCNNode? = nil
-    var boxCam: SCNNode?
-    var boxPlane: SCNNode?
-    
-    var sentence1 = ""
-    var sentence2 = ""
-    
-    private var startingPositionNode: SCNNode?
-    private var endPositionNode: SCNNode?
-    
-    //    var lastDeterminedAngle = 0
-    
     let camRelPosition = SCNVector3Make(0,0,0)
-    //    let planePosition = Plane.returnPlanePosition()
     
     let configuration = ARWorldTrackingConfiguration()
     
@@ -55,6 +40,16 @@ class ARSceneManager: NSObject {
         sceneView.showsStatistics = true
         sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
+    
+    var ship: SCNNode? = nil
+    var boxCam: SCNNode?
+    var boxPlane: SCNNode?
+    
+    var sentence1 = ""
+    var sentence2 = ""
+    
+    private var startingPositionNode: SCNNode?
+    private var endPositionNode: SCNNode?
 }
 
 //
@@ -70,83 +65,6 @@ extension ARSceneManager: ARSCNViewDelegate {
         self.planes[anchor.identifier] = plane
         node.addChildNode(plane)
         plane.position = SCNVector3()
-        
-        print(planeAnchor.geometry.boundaryVertices)
-        let point1 = planeAnchor.geometry.boundaryVertices[0]
-        let point2 = planeAnchor.geometry.boundaryVertices[1]
-        
-        let nx1 = point1.x
-        let nz1 = point1.z
-        print("nx1: ", nx1)
-        print("nz1: ", nz1)
-        
-        let nx2 = point2.x
-        let nz2 = point2.z
-        print("nx2: ", nx2)
-        print("nz2: ", nz2)
-        
-        let deltaNX = nx2-nx1
-        let deltaNZ = nz2-nz1
-        
-        var ang = atan2(deltaNZ, deltaNX)
-        
-        ang = ang * 180 / .pi
-        
-        print("ang: ", ang)
-        
-        if (ang > 89) {
-            resetScene()
-        }
-        
-        let EAngle = (90-ang)
-        print("EAngle: ", EAngle)
-        
-        let roundedAng = EAngle.rounded()
-        print("roundedAng: ", roundedAng)
-        
-        //            if (self.ship != nil){
-        //                self.resetScene()
-        //            }
-        
-        /* else */ if (self.ship == nil) {
-            let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
-            self.ship = shipScene.rootNode.childNodes.first
-            //                node.addChildNode(self.ship!)
-            self.sceneView.scene.rootNode.addChildNode(self.ship!)
-            self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
-            self.sceneView.pointOfView?.addChildNode(self.ship!)
-            /* Maybe make the ship nil so that it goes away?*/
-            self.ship?.eulerAngles.z = 0
-        }
-        
-        //            else { print ("Else HitTestResult") }
-        
-        if (ang > 89) {
-            print("Turn Left \(roundedAng) Degrees")
-            self.sentence1 = "Turn Left \(roundedAng) Degrees"
-            self.speakText()
-            self.ship?.eulerAngles.z = EAngle
-        }
-            
-        else if (EAngle < 0 && EAngle > -80) {
-            print("Turn Left \(roundedAng) Degrees")
-            self.sentence1 = "Turn Left \(roundedAng) Degrees"
-            self.speakText()
-            self.ship?.eulerAngles.z = EAngle
-        }
-            
-        else if (EAngle > 0 && EAngle < 80) {
-            print("Turn Right \(roundedAng) Degrees")
-            self.sentence1 = "Turn Right \(roundedAng) Degrees"
-            self.speakText()
-            self.ship?.eulerAngles.z = -EAngle
-        }
-            
-        else {
-            print("Turn 90 Degrees")
-            self.sentence1 = "Turn 90 Degrees"
-            self.speakText()
-        }
         
         /* Below is the code for determining distance*/
         
@@ -188,9 +106,116 @@ extension ARSceneManager: ARSCNViewDelegate {
         
         let distSentence = String(format: "%.2f", CalculatingDistance.ReturnDistance(x: xDist, y: yDist, z: zDist))
         print("distSentence: ", distSentence)
-        self.sentence2 = "Object is within \(distSentence) meters"
+        self.sentence1 = "Object is within \(distSentence) meters"
         self.speakText()
+        
+        /* Above is the code for determining distance*/
+        
+        /* Below is the code for determining angle to plane*/
+        
+        //        print(planeAnchor.geometry.boundaryVertices)
+        //        let point1 = planeAnchor.geometry.boundaryVertices[0]
+        //        let point2 = planeAnchor.geometry.boundaryVertices[1]
+        //
+        //        let nx1 = point1.x
+        //        let nz1 = point1.z
+        //        print("nx1: ", nx1)
+        //        print("nz1: ", nz1)
+        //
+        //        let nx2 = point2.x
+        //        let nz2 = point2.z
+        //        print("nx2: ", nx2)
+        //        print("nz2: ", nz2)
+        //
+        //        let deltaNX = nx2-nx1
+        //        let deltaNZ = nz2-nz1
+        //
+        //        var ang = atan2(deltaNZ, deltaNX)
+        
+        let deltaX = xDist
+        print("deltaX: ", deltaX)
+        let deltaZ = zDist
+        print("deltaZ: ", deltaZ)
+        
+        let ang = abs(atan2(deltaZ, deltaX) * (180 / .pi))
+        
+        print("ang: ", ang)
+        
+        let EAngle = abs(90-ang)
+        print("EAngle: ", EAngle)
+        
+        let roundedAng = EAngle.rounded()
+        print("roundedAng: ", roundedAng)
+        
+        //            if (self.ship != nil){
+        //                self.resetScene()
+        //            }
+        
+        //        if (ang > 89) {
+        //            resetScene()
+        //        }
+        
+        /* else */ if (self.ship == nil) {
+            let shipScene = SCNScene(named: "art.scnassets/ship.scn")!
+            self.ship = shipScene.rootNode.childNodes.first
+            //                node.addChildNode(self.ship!)
+            self.sceneView.scene.rootNode.addChildNode(self.ship!)
+            self.ship?.position = SCNVector3(x: 0, y: 0, z: -30)
+            self.sceneView.pointOfView?.addChildNode(self.ship!)
+            /* Maybe make the ship nil so that it goes away?*/
+            self.ship?.eulerAngles.z = 90
+        }
+        
+        //            else { print ("Else HitTestResult") }
+        
+        //        if (ang > 89) {
+        //
+        //        }
+        
+        if (deltaX < 0 && deltaZ < 0 || deltaX > 0 && deltaZ > 0) {
+            print("Turn Right \(roundedAng) Degrees")
+            self.sentence2 = "Turn Right \(roundedAng) Degrees"
+            self.speakText()
+            self.ship?.eulerAngles.z = EAngle
+        }
+            
+        else if (deltaX < 0 && deltaZ > 0 || deltaX > 0 && deltaZ < 0 ) {
+            print("Turn Left \(roundedAng) Degrees")
+            self.sentence2 = "Turn Left \(roundedAng) Degrees"
+            self.speakText()
+            self.ship?.eulerAngles.z = EAngle
+        }
+            
+        else {
+            print("Turn 90 Degrees")
+            self.sentence2 = "Turn 90 Degrees"
+            self.speakText()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+            self.resetScene()
+        })
+        
     }
+    //        if (EAngle < 0 && EAngle > -80) {
+    //            print("Turn Left \(roundedAng) Degrees")
+    //            self.sentence2 = "Turn Left \(roundedAng) Degrees"
+    //            self.speakText()
+    //            self.ship?.eulerAngles.z = EAngle
+    //        }
+    //
+    //        else if (EAngle > 0 && EAngle < 80) {
+    //            print("Turn Right \(roundedAng) Degrees")
+    //            self.sentence2 = "Turn Right \(roundedAng) Degrees"
+    //            self.speakText()
+    //            self.ship?.eulerAngles.z = -EAngle
+    //        }
+    //
+    //        else {
+    //            print("Turn 90 Degrees")
+    //            self.sentence2 = "Turn 90 Degrees"
+    //            self.speakText()
+    //        }
     
     func speakText(){
         let synth1 = AVSpeechSynthesizer()
@@ -201,7 +226,10 @@ extension ARSceneManager: ARSCNViewDelegate {
         if(!synth1.isSpeaking){
             synth1.speak(utterance)
         }
-        //        resetScene()
+        
+        //        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+        //            self.resetScene()
+        //        })
     }
     
     func resetScene(){
@@ -210,8 +238,7 @@ extension ARSceneManager: ARSCNViewDelegate {
         ship?.removeFromParentNode()
         startingPositionNode?.removeAllActions()
         endPositionNode?.removeAllActions()
-        self.ship = nil
-        
+        //        self.ship = nil
         sceneView.session.run(configuration, options: [.removeExistingAnchors, .resetTracking])
     }
     
